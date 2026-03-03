@@ -1,0 +1,11 @@
+{
+  "name": "gemini-image-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for Gemini Image Generation with custom API endpoint support",
+  "type": "module",
+  "main": "index.mjs",
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  }
+}
