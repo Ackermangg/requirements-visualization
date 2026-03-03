@@ -26,47 +26,89 @@
 ## 快速安装
 
 ```bash
-git clone https://github.com/[YOUR_USERNAME]/requirements-visualization
+git clone https://github.com/Ackermangg/requirements-visualization
 cd requirements-visualization
 chmod +x install.sh
 ./install.sh
 ```
 
-安装脚本会：
-1. 复制 Skills 到 `~/.claude/skills/`（全局）或 `.claude/skills/`（当前项目）
-2. 检查并安装 `mermaid-cli`（用于 `/流程图` PNG 渲染）
-3. 安装 MCP Server 依赖
-4. 引导配置 Gemini API（支持第三方兼容 API 地址）
+安装脚本会询问你使用的 Agent 工具，并将 Skills 复制到对应目录：
+
+| 工具 | Skills 目录 |
+|------|------------|
+| Claude Code（全局） | `~/.claude/skills/` |
+| Claude Code（当前项目） | `{project}/.claude/skills/` |
+| Cursor | `{project}/.cursor/commands/` |
+| OpenAI Codex CLI | `~/.codex/skills/` |
+
+此外还会：
+- 检查并安装 `mermaid-cli`（用于 `/流程图` PNG 渲染）
+- 安装 MCP Server 依赖，并引导配置 Gemini API
 
 ## 手动安装
 
-### 1. 安装 `/流程图`（无需 API Key）
+### 第一步：复制 Skills 到对应工具目录
+
+**Claude Code（全局，推荐）**
+```bash
+mkdir -p ~/.claude/skills
+cp -r .claude/skills/图解 ~/.claude/skills/
+cp -r .claude/skills/流程图 ~/.claude/skills/
+```
+
+**Cursor**
+```bash
+mkdir -p /your-project/.cursor/commands
+cp -r .claude/skills/图解 /your-project/.cursor/commands/
+cp -r .claude/skills/流程图 /your-project/.cursor/commands/
+```
+
+**OpenAI Codex CLI**
+```bash
+mkdir -p ~/.codex/skills
+cp -r .claude/skills/图解 ~/.codex/skills/
+cp -r .claude/skills/流程图 ~/.codex/skills/
+```
+
+### 第二步：安装 mermaid-cli（`/流程图` 必需）
 
 ```bash
-# 全局安装
-mkdir -p ~/.claude/skills
-cp -r .claude/skills/流程图 ~/.claude/skills/
-
-# 安装 mermaid-cli
 npm install -g @mermaid-js/mermaid-cli
 ```
 
-### 2. 安装 `/图解`（需要 Gemini Image API）
+### 第三步：配置 Gemini Image MCP Server（`/图解` 必需）
 
 ```bash
-# 复制 Skill
-cp -r .claude/skills/图解 ~/.claude/skills/
-
-# 安装 MCP Server 依赖
 cd mcp-server && npm install && cd ..
+```
 
-# 注册 MCP Server（支持第三方 Gemini 兼容 API）
+**Claude Code**
+```bash
 claude mcp add gemini-image -s user \
   -e GEMINI_API_BASE_URL="https://your-api-endpoint/v1" \
   -e GEMINI_API_KEY="your-api-key" \
   -e GEMINI_MODEL_ID="google/gemini-3.1-flash-image-preview" \
   -- node "$(pwd)/mcp-server/index.mjs"
 ```
+
+**Cursor**：Settings → MCP → 添加：
+```json
+{
+  "mcpServers": {
+    "gemini-image": {
+      "command": "node",
+      "args": ["/path/to/mcp-server/index.mjs"],
+      "env": {
+        "GEMINI_API_BASE_URL": "https://your-api-endpoint/v1",
+        "GEMINI_API_KEY": "your-api-key",
+        "GEMINI_MODEL_ID": "google/gemini-3.1-flash-image-preview"
+      }
+    }
+  }
+}
+```
+
+**Codex CLI / 其他工具**：参考各工具的 MCP Server 配置文档。
 
 ## 使用方法
 
