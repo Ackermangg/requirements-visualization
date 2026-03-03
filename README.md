@@ -1,6 +1,8 @@
-# 需求可视化 Skills for Claude Code
+# 需求可视化 Skills
 
-将复杂业务需求文档瞬间转化为**图解**和**逻辑流程图**的 Claude Code Skills。
+将复杂业务需求文档瞬间转化为**图解**和**逻辑流程图**的跨平台 AI Agent Skills。
+
+> **Skills 是模型无关的**：每个 Skill 是一份 prompt 指令集，由宿主工具的 AI 模型来理解和执行——Claude Code 用 Claude，Cursor 用 Cursor 内置模型，Codex CLI 用 OpenAI 模型，以此类推。`/图解` 调用 Gemini 的只是图片生成那一步（通过 MCP 工具），需求分析和 prompt 构建由宿主模型完成。
 
 ## 包含的 Skills
 
@@ -68,7 +70,7 @@ claude mcp add gemini-image -s user \
 
 ## 使用方法
 
-重启 Claude Code 后，在任意项目中使用：
+安装后重启 agent 工具，在任意项目中使用：
 
 ```
 /图解 [粘贴需求文本]
@@ -86,29 +88,37 @@ claude mcp add gemini-image -s user \
 
 ## 兼容性
 
+两个 Skill 均为模型无关的 prompt 指令集，可运行在任何支持 SKILL.md 格式的 agent 工具上。
+
 | 工具 | `/图解` | `/流程图` | 说明 |
 |------|--------|---------|------|
-| **Claude Code** | ✅ | ✅ | 完整支持，含 MCP |
-| **VS Code Copilot** | ⚠️ | ✅ | 图解需 MCP 配置；流程图完整支持 |
-| **OpenAI Codex CLI** | ⚠️ | ✅ | 同上 |
-| **Cursor** | ❌ | ✅ | Cursor 使用 `.cursor/commands/` 格式，Skills 需手动适配 |
+| **Claude Code** | ✅ | ✅ | 完整支持，含 MCP；推荐使用 |
+| **VS Code Copilot** | ✅ | ✅ | 需在 VS Code 中配置 `gemini-image` MCP Server |
+| **OpenAI Codex CLI** | ✅ | ✅ | 需配置 MCP Server；`mermaid-cli` 需全局安装 |
+| **Cursor** | ✅ | ✅ | 将 SKILL.md 内容复制到 `.cursor/rules/` 或 `.cursor/commands/` 中即可 |
+
+> **`/图解` 的前提**：需要在宿主工具中注册 `gemini-image` MCP Server，图片生成才能工作。注册方式见下方"手动安装"。
 
 ## 技术架构
 
 ```
 用户输入需求文本/截图
        ↓
-  Claude Code Skill
+  Agent Skill（prompt 指令集，由宿主模型执行）
        ↓
-  Claude 深度分析需求
+  宿主 AI 模型深度分析需求
+  （Claude / GPT-4 / Cursor AI / 任意模型）
        ↓
-  ┌──────────────┬──────────────────┐
-  │  /图解        │  /流程图           │
-  │  构建图片提示词│  生成 Mermaid 代码 │
-  │       ↓       │       ↓           │
-  │  Gemini Image │  mermaid-cli      │
-  │  MCP Server   │  渲染 PNG         │
-  └──────────────┴──────────────────┘
+  ┌──────────────────┬──────────────────┐
+  │  /图解            │  /流程图           │
+  │  宿主模型构建      │  宿主模型生成       │
+  │  图片生成 prompt  │  Mermaid 代码      │
+  │       ↓           │       ↓           │
+  │  gemini-image     │  mermaid-cli      │
+  │  MCP Server       │  渲染 PNG         │
+  │  （图片生成工具，  │                   │
+  │   与宿主模型无关） │                   │
+  └──────────────────┴──────────────────┘
 ```
 
 ### MCP Server
